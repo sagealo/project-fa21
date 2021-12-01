@@ -39,7 +39,7 @@ def solve(tasks):
         max = 0
 
         for task in tasks:
-            if curr_time + task.get_duration()<= 1440:
+            if curr_time + task.get_duration() <= 1440:
                 val = heuristic(task, curr_time)
                 if val > max:
                     max = val
@@ -48,9 +48,9 @@ def solve(tasks):
         if best == None:
             return result
 
-        curr_time += task.get_duration()
-        result.append(task.get_task_id())
-        tasks.remove(task)
+        curr_time += best.get_duration()
+        result.append(best.get_task_id())
+        tasks.remove(best)
 
     return result
 
@@ -69,7 +69,7 @@ def heuristic(task, timestep):
 def get_real_value(time, task):
     deadline = task.get_deadline()
 
-    time_late = time - deadline
+    time_late = time + task.get_duration() - deadline
 
     return task.get_late_benefit(time_late)
 
@@ -80,7 +80,7 @@ if __name__ == '__main__':
      for dir in os.listdir('inputs/'):
          for input_path in os.listdir('inputs/' + dir):
              abs_path = 'inputs/' + dir + '/' + input_path
-             output_path = 'outputs/' + input_path[:-3] + '.out'
+             output_path = 'outputs/' + dir + '/' + input_path[:-3] + '.out'
              print(abs_path)
              tasks = read_input_file(abs_path)
              output = solve(tasks)
