@@ -81,7 +81,7 @@ def output_profit(tasks: list[Task]):
 
     return profit
 
-def overwrite_if_better(output, best_output):
+def overwrite_if_better(output: list[Task], best_output: list[Task]):
     new_profit = output_profit(output)
     max_profit = output_profit(best_output)
     if new_profit > max_profit:
