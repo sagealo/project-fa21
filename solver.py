@@ -74,7 +74,7 @@ def get_real_value(time, task):
     return task.get_late_benefit(time_late)
 
 
-def output_profit(tasks: list[Task]):
+def output_profit(tasks):
     profit = 0
     time = 0
     for task in tasks:
@@ -84,9 +84,10 @@ def output_profit(tasks: list[Task]):
 
     return profit
 
-def overwrite_if_better(output: list[Task], best_output: list[Task]):
+def overwrite_if_better(output, best_output):
     new_profit = output_profit(output)
     max_profit = output_profit(best_output)
+    print("New: ", new_profit, "Max: ", max_profit)
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
         print("BETTER: ","Increase in profit: ", new_profit - max_profit, output_path)
