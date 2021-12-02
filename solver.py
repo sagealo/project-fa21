@@ -61,7 +61,7 @@ def heuristic(task, time):
     duration = task.get_duration()
     time_left = 1440 - time
 
-    rate = val / (duration / time_left)
+    rate = (val + 1) / (duration / time_left)
     return rate
 
 def get_real_value(time, task):
@@ -77,16 +77,25 @@ def output_profit(tasks: list[Task]):
     for task in tasks:
         val = get_real_value(time, task)
         profit += val
-        time += task.get_duration
+        time += task.get_duration()
 
     return profit
 
 def overwrite_if_better(output: list[Task], best_output: list[Task]):
     new_profit = output_profit(output)
     max_profit = output_profit(best_output)
+    print(new_profit, max_profit)
     if new_profit > max_profit:
-        write_output_file(output_path, output)
+        write_output_file(output_path, [task.get_task_id() for task in output])
         print("BETTER: ", output_path)
+
+def ids_to_task_objects(ids, input_path):
+    scheduled_tasks = []
+    all_tasks = read_input_file(input_path)
+    for id in ids:
+        scheduled_tasks.append(all_tasks[id - 1])
+
+    return scheduled_tasks
 
 # Here's an example of how to run your solver.
 if __name__ == '__main__':
@@ -94,10 +103,14 @@ if __name__ == '__main__':
          for input_path in os.listdir('inputs/' + dir):
              abs_path = 'inputs/' + dir + '/' + input_path
              output_path = 'outputs/' + dir + '/' + input_path[:-3] + '.out'
-             print(abs_path)
+             # print(abs_path)
              tasks = read_input_file(abs_path)
              output = solve(tasks)
              best_output = read_output_file(output_path)
+
+             output = ids_to_task_objects(output, abs_path)
+             best_output =ids_to_task_objects(best_output, abs_path)
+
              overwrite_if_better(output, best_output)
 
 
