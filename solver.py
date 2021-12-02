@@ -60,8 +60,11 @@ def heuristic(task, time):
     val = get_real_value(time, task)
     duration = task.get_duration()
     time_left = 1440 - time
-
-    rate = (val + 1) / (duration / time_left)
+    time_late = time + task.get_duration() - task.get_deadline()
+    deadline = task.get_deadline()
+    profit = task.get_max_benefit()
+    # rate = profit / (duration * max(1, time_late))
+    rate = profit / time_left
     return rate
 
 def get_real_value(time, task):
@@ -84,10 +87,9 @@ def output_profit(tasks: list[Task]):
 def overwrite_if_better(output: list[Task], best_output: list[Task]):
     new_profit = output_profit(output)
     max_profit = output_profit(best_output)
-    print(new_profit, max_profit)
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
-        print("BETTER: ", output_path)
+        print("BETTER: ","Increase in profit: ", new_profit - max_profit, output_path)
 
 def ids_to_task_objects(ids, input_path):
     scheduled_tasks = []
