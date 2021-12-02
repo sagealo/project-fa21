@@ -1,6 +1,7 @@
-from parse import read_input_file, write_output_file
+from parse import read_input_file, write_output_file, read_output_file
 from math import e
 import os
+import Task
 
 
 # Each task(igloo) has:
@@ -55,25 +56,37 @@ def solve(tasks):
     return result
 
 
-def heuristic(task, timestep):
-
-    val = get_real_value(timestep, task)
-
+def heuristic(task, time):
+    val = get_real_value(time, task)
     duration = task.get_duration()
+    time_left = 1440 - time
 
-    rate = val / duration
-
+    rate = val / (duration / time_left)
     return rate
-
 
 def get_real_value(time, task):
     deadline = task.get_deadline()
-
     time_late = time + task.get_duration() - deadline
 
     return task.get_late_benefit(time_late)
 
 
+def output_profit(tasks: list[Task]):
+    profit = 0
+    time = 0
+    for task in tasks:
+        val = get_real_value(time, task)
+        profit += val
+        time += task.get_duration
+
+    return profit
+
+def overwrite_if_better(output, best_output):
+    new_profit = output_profit(output)
+    max_profit = output_profit(best_output)
+    if new_profit > max_profit:
+        write_output_file(output_path, output)
+        print("BETTER: ", output_path)
 
 # Here's an example of how to run your solver.
 if __name__ == '__main__':
@@ -84,4 +97,7 @@ if __name__ == '__main__':
              print(abs_path)
              tasks = read_input_file(abs_path)
              output = solve(tasks)
-             write_output_file(output_path, output)
+             best_output = read_output_file(output_path)
+             overwrite_if_better(output, best_output)
+
+
