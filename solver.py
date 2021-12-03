@@ -66,7 +66,7 @@ def heapify_tasks(tasks):
     return start_times
 
 def heuristic(task, time):
-    return heuristic_sage1(task, time) * heuristic_abel0(task, time)
+    return heuristic_sage1(task, time) * heuristic_sage2(task, time)
 
 def heuristic_sage1(task, time):
     # This function gives more weight to functions with better profit over time and real_value / time
