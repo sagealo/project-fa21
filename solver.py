@@ -2,6 +2,7 @@ from parse import read_input_file, write_output_file, read_output_file
 from math import e
 import os
 import Task
+import random
 
 
 # Each task(igloo) has:
@@ -37,7 +38,7 @@ def solve(tasks):
 
     while curr_time < 1440:
         best = None
-        max = 0
+        max = float('-inf')
 
         for task in tasks:
             if curr_time + task.get_duration() <= 1440:
@@ -57,15 +58,7 @@ def solve(tasks):
 
 
 def heuristic(task, time):
-    val = get_real_value(time, task)
-    duration = task.get_duration()
-    time_left = 1440 - time
-    time_late = time + task.get_duration() - task.get_deadline()
-    deadline = task.get_deadline()
-    profit = task.get_max_benefit()
-    # rate = profit / (duration * max(1, time_late))
-    rate = profit / time_left
-    return rate
+    return get_real_value(time, task) * (task.get_max_benefit() / task.get_duration()) * (get_real_value(time, task) / task.get_duration())
 
 def get_real_value(time, task):
     deadline = task.get_deadline()
@@ -87,7 +80,6 @@ def output_profit(tasks):
 def overwrite_if_better(output, best_output):
     new_profit = output_profit(output)
     max_profit = output_profit(best_output)
-    print("New: ", new_profit, "Max: ", max_profit)
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
         print("BETTER: ","Increase in profit: ", new_profit - max_profit, output_path)
