@@ -3,7 +3,6 @@ from math import e
 import os
 import Task
 import random
-import heapq as heap
 
 
 # Each task(igloo) has:
@@ -57,47 +56,6 @@ def solve(tasks):
 
     return result
 
-def heapify_tasks(tasks):
-    start_times = []
-    for task in tasks:
-        start_time = max(0, task.get_deadline() - task.get_duration)
-        pair = (start_time, task)
-        heap.heappush(start_times, pair)
-    return start_times
-
-def heuristic(task, time):
-<<<<<<< HEAD
-    return heuristic_sage1(task, time) * heuristic_sage2(task, time)
-=======
-    return heuristic_sage1(task, time) + 10 * heuristic_sage2(task, time)  
->>>>>>> 07c280c (Pulling)
-
-def heuristic_sage1(task, time):
-    # This function gives more weight to functions with better profit over time and real_value / time
-    return (task.get_max_benefit() / task.get_duration()) * (get_real_value(time, task) / task.get_duration())
-
-def heuristic_sage2(task, time):
-    # This function gives more weight to tasks which have an earlier deadline
-    return (1440 - task.get_deadline()) * get_real_value(time, task)
-
-def heuristic_abel0(task, time):
-    val = get_real_value(time, task)
-    max_profit = task.get_max_benefit()
-    deadline = task.get_deadline()
-    duration = task.get_duration()
-    time_late = max(1, time + task.get_duration() - deadline)
-    time_left = 1440 - time
-    return val * max_profit / (time_late ** 2) * (duration ** 4) * deadline
-
-
-
-def get_real_value(time, task):
-    deadline = task.get_deadline()
-    time_late = time + task.get_duration() - deadline
-
-    return task.get_late_benefit(time_late)
-
-
 def output_profit(tasks):
     profit = 0
     time = 0
@@ -107,6 +65,43 @@ def output_profit(tasks):
         time += task.get_duration()
 
     return profit
+
+def solve_brute_force(tasks, curr_time, curr_igloo, result):
+    # Either use the task or we don't use the task
+    # Pass in tasks sorted by deadline
+    if curr_time >= 1440 or curr_igloo >= len(tasks):
+        return result
+    else:
+        use_igloo = result
+        if tasks[curr_igloo].get_duration() + curr_time <= 1440:
+            use_igloo = solve_brute_force(tasks, curr_time + tasks[curr_igloo].get_duration(), curr_igloo + 1, result + [tasks[curr_igloo]])
+        skip_igloo = solve_brute_force(tasks, curr_time, curr_igloo + 1, result)
+        if (output_profit(use_igloo) > output_profit(skip_igloo)):
+            return use_igloo
+        else: 
+            return skip_igloo
+
+
+def heuristic(task, time):
+    return task.get_duration()
+
+def heuristic_sage1(task, time):
+    # This function gives more weight to functions with better profit over time and real_value / time
+    return (task.get_max_benefit() / task.get_duration()) * (get_real_value(time, task) / task.get_duration())
+
+def heuristic_sage2(task, time):
+    # This function gives more weight to tasks which have an earlier deadline
+    return (1440 - task.get_deadline()) * get_real_value(time, task) + 1
+
+def heuristic_sage3(task, time):
+    return ((1440 - task.get_deadline()) / 1440) * (get_real_value(time, task) / task.get_duration()) + 1
+
+
+def get_real_value(time, task):
+    deadline = task.get_deadline()
+    time_late = time + task.get_duration() - deadline
+
+    return task.get_late_benefit(time_late)
 
 def overwrite_if_better(output, best_output):
     new_profit = output_profit(output)
