@@ -91,7 +91,7 @@ def overwrite_if_better(output, best_output):
     max_profit = output_profit(best_output)
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
-        print("BETTER: ","Increase in profit: ", new_profit - max_profit, output_path)
+        print("BETTER: ","Percent increase in profit: ", ((new_profit - max_profit) / max_profit) * 100, '%', output_path)
 
 def ids_to_task_objects(ids, input_path):
     scheduled_tasks = []
