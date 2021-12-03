@@ -22,7 +22,7 @@ import random
 # Goal: We wish to maximize the total profit/benefit!
 
 
-def solve(tasks):
+def solve(tasks, input_path):
     """
     Args:
         tasks: list[Task], list of igloos to polish
@@ -51,10 +51,10 @@ def solve(tasks):
             return result
 
         curr_time += best.get_duration()
-        result.append(best.get_task_id())
+        result.append(best)
         tasks.remove(best)
 
-    best = simulated_annealing(result)
+    best = simulated_annealing(result, tasks, input_path)
 
     return best
 
@@ -103,7 +103,7 @@ def ids_to_task_objects(ids, input_path):
 
 
 #simulated annealing attempt "https://medium.com/swlh/how-to-implement-simulated-annealing-algorithm-in-python-ab196c2f56a0"
-def simulated_annealing(initial_state):
+def simulated_annealing(initial_state, tasks, input_path):
     """Peforms simulated annealing to find a solution"""
     initial_temp = 90
     final_temp = .1
@@ -116,10 +116,11 @@ def simulated_annealing(initial_state):
     solution = current_state
 
     while current_temp > final_temp:
-        neighbor = random.choice(get_neighbors())
+
+        neighbor = random.choice(get_neighbors(current_state, tasks, input_path))
 
         # Check if neighbor is best so far
-        cost_diff = get_cost(self.current_state) - get_cost(neighbor)
+        cost_diff = get_cost(current_state) - get_cost(neighbor)
 
         # if the new solution is better, accept it
         if cost_diff > 0:
@@ -137,49 +138,38 @@ def get_cost(state):
     """Calculates cost of the argument state for your solution."""
     return output_profit(state)
 
-def get_neighbors(tasks, state):
+def get_neighbors(state, tasks, input_path):
     """Returns neighbors of the argument state for your solution."""
 
     num_tasks = len(state)
 
     rand_task = random.randint(1, num_tasks - 1)
 
-    task_to_replace = state[rand_task]
-
-    task_to_replace_duration = task_to_replace.get_duration()
-
     neighbors = []
 
     #replace a task with a task we havent used yet
-
     for task in tasks:
         if task not in state:
             new_state = state.copy()
             new_state[rand_task] = task
-            if valid(new_state):
+            if valid(new_state, input_path):
                 neighbors.append(new_state)
 
-    #swap the order of 2 tasks
-
-    rand_task2 = random.randint(1, num_tasks - 1)
-
-    task1 = state[rand_task]
-    task2 = state[rand_task2]
-
-    new_state = state.copy()
-
-    new_state[rand_task] = task2
-    new_state[rand_task2] = task1
-
-    neighbors.append(new_state)
+    #remove a task
+    for task in state:
+        new_state = state.copy()
+        new_state.remove(task)
+        neighbors.append(new_state)
 
     return neighbors
 
 
-def valid(permutation):
+def valid(permutation, input_path):
+
     total = 1440
     time = 0
     for task in permutation:
+        """print(type(task))"""
         time+= task.get_duration()
 
     if time <= total:
@@ -200,10 +190,16 @@ if __name__ == '__main__':
              output_path = 'outputs/' + dir + '/' + input_path[:-3] + '.out'
              # print(abs_path)
              tasks = read_input_file(abs_path)
-             output = solve(tasks)
+             output = solve(tasks, abs_path)
+             print(output_profit(output))
+             print("reached")
              best_output = read_output_file(output_path)
 
-             output = ids_to_task_objects(output, abs_path)
+
+
+             #output = ids_to_task_objects(output, abs_path)
              best_output =ids_to_task_objects(best_output, abs_path)
+             print(output_profit(best_output))
 
              overwrite_if_better(output, best_output)
+             print("reached2")
