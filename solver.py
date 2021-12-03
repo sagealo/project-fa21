@@ -56,9 +56,16 @@ def solve(tasks):
 
     return result
 
-
 def heuristic(task, time):
-    return get_real_value(time, task) * (task.get_max_benefit() / task.get_duration()) * (get_real_value(time, task) / task.get_duration())
+    return heuristic_sage1(task, time)
+
+def heuristic_sage1(task, time):
+    # This function gives more weight to functions with better profit over time and real_value / time
+    return (task.get_max_benefit() / task.get_duration()) * (get_real_value(time, task) / task.get_duration())
+
+def heuristic_sage2(task, time):
+    # This function gives more weight to tasks which have an earlier deadline
+    return (1440 - task.get_deadline()) * get_real_value(time, task)
 
 def get_real_value(time, task):
     deadline = task.get_deadline()
