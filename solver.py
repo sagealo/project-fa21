@@ -54,7 +54,9 @@ def solve(tasks):
         result.append(best.get_task_id())
         tasks.remove(best)
 
-    return result
+    best = simulated_annealing(result)
+
+    return best
 
 def heuristic(task, time):
     return heuristic_sage1(task, time)
@@ -99,6 +101,97 @@ def ids_to_task_objects(ids, input_path):
 
     return scheduled_tasks
 
+
+#simulated annealing attempt "https://medium.com/swlh/how-to-implement-simulated-annealing-algorithm-in-python-ab196c2f56a0"
+def simulated_annealing(initial_state):
+    """Peforms simulated annealing to find a solution"""
+    initial_temp = 90
+    final_temp = .1
+    alpha = 0.01
+
+    current_temp = initial_temp
+
+    # Start by initializing the current state with the initial state
+    current_state = initial_state
+    solution = current_state
+
+    while current_temp > final_temp:
+        neighbor = random.choice(get_neighbors())
+
+        # Check if neighbor is best so far
+        cost_diff = get_cost(self.current_state) - get_cost(neighbor)
+
+        # if the new solution is better, accept it
+        if cost_diff > 0:
+            solution = neighbor
+        # if the new solution is not better, accept it with a probability of e^(-cost/temp)
+        else:
+            if random.uniform(0, 1) < math.exp(-cost_diff / current_temp):
+                solution = neighbor
+        # decrement the temperature
+        current_temp -= alpha
+
+    return solution
+
+def get_cost(state):
+    """Calculates cost of the argument state for your solution."""
+    return output_profit(state)
+
+def get_neighbors(tasks, state):
+    """Returns neighbors of the argument state for your solution."""
+
+    num_tasks = len(state)
+
+    rand_task = random.randint(1, num_tasks - 1)
+
+    task_to_replace = state[rand_task]
+
+    task_to_replace_duration = task_to_replace.get_duration()
+
+    neighbors = []
+
+    #replace a task with a task we havent used yet
+
+    for task in tasks:
+        if task not in state:
+            new_state = state.copy()
+            new_state[rand_task] = task
+            if valid(new_state):
+                neighbors.append(new_state)
+
+    #swap the order of 2 tasks
+
+    rand_task2 = random.randint(1, num_tasks - 1)
+
+    task1 = state[rand_task]
+    task2 = state[rand_task2]
+
+    new_state = state.copy()
+
+    new_state[rand_task] = task2
+    new_state[rand_task2] = task1
+
+    neighbors.append(new_state)
+
+    return neighbors
+
+
+def valid(permutation):
+    total = 1440
+    time = 0
+    for task in permutation:
+        time+= task.get_duration()
+
+    if time <= total:
+        return True
+    else:
+        return False
+
+
+
+
+
+
 # Here's an example of how to run your solver.
 if __name__ == '__main__':
      for dir in os.listdir('inputs/'):
@@ -114,5 +207,3 @@ if __name__ == '__main__':
              best_output =ids_to_task_objects(best_output, abs_path)
 
              overwrite_if_better(output, best_output)
-
-
