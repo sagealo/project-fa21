@@ -3,6 +3,7 @@ from math import e
 import os
 import Task
 import random
+import heapq as heap
 
 
 # Each task(igloo) has:
@@ -56,8 +57,16 @@ def solve(tasks):
 
     return result
 
+def heapify_tasks(tasks):
+    start_times = []
+    for task in tasks:
+        start_time = max(0, task.get_deadline() - task.get_duration)
+        pair = (start_time, task)
+        heap.heappush(start_times, pair)
+    return start_times
+
 def heuristic(task, time):
-    return heuristic_sage1(task, time)
+    return heuristic_sage1(task, time) * heuristic_abel0(task, time)
 
 def heuristic_sage1(task, time):
     # This function gives more weight to functions with better profit over time and real_value / time
@@ -66,6 +75,17 @@ def heuristic_sage1(task, time):
 def heuristic_sage2(task, time):
     # This function gives more weight to tasks which have an earlier deadline
     return (1440 - task.get_deadline()) * get_real_value(time, task)
+
+def heuristic_abel0(task, time):
+    val = get_real_value(time, task)
+    max_profit = task.get_max_benefit()
+    deadline = task.get_deadline()
+    duration = task.get_duration()
+    time_late = max(1, time + task.get_duration() - deadline)
+    time_left = 1440 - time
+    return val * max_profit / (time_late ** 2) * (duration ** 4) * deadline
+
+
 
 def get_real_value(time, task):
     deadline = task.get_deadline()
