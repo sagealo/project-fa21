@@ -20,6 +20,7 @@ import random
 #     !-> self.get_late_benefit(minutes_late)
 
 # Goal: We wish to maximize the total profit/benefit!
+# NOTE: To prepare submission run `python3 prepare_submission.py outputs/ submission.json`
 
 
 def solve(tasks):
@@ -93,18 +94,14 @@ def favor_early_deadline(task, time):
     # This function gives more weight to tasks which have an earlier deadline
     return ((1440 - task.get_deadline()) + 1) * get_real_value(time, task)
 
-def heuristic_sage3(task, time):
-    return ((1440 - task.get_deadline()) / 1440) * (get_real_value(time, task) / task.get_duration()) + 1
-
 def favor_little_free_time(task, time):
-    deadline = task.get_deadline()
-    time_after_task = time + task.get_duration()
-    free_time = deadline - time_after_task
-    profit = favor_profit_over_time(task, time) * favor_early_deadline(task, time)
-    if free_time == 0:
-        return 2880 * profit
-    elif free_time > 0:
-        return (1440 / free_time) * profit
+    deadline = task.get_deadline()                                                  # Deadline of task
+    time_after_task = time + task.get_duration()                                    # The time after the task is completed
+    free_time = deadline - time_after_task                                          # The amount of time between the end of the task and the deadline
+    profit = favor_profit_over_time(task, time) * favor_early_deadline(task, time)  # The profit/hueristic function (NOTE: Experiment with this value)
+    constant = 1.38                                                                 # The exponential decay value i.e. the later the bigger the free time the worse it is. (NOTE: Experiment with this value)
+    if free_time >= 0:  
+        return (1440 - (free_time ** constant)) * profit
     else: 
         return profit
 
