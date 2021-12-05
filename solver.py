@@ -126,12 +126,7 @@ if __name__ == '__main__':
              output_path = 'outputs/' + dir + '/' + input_path[:-3] + '.out'
              # print(abs_path)
              tasks = read_input_file(abs_path)
-             if abs_path != 'inputs/small/small-1.in':
-                output = solve(tasks)
-             else:
-                 print('Starting BF')
-                 output = solve_brute_force(tasks, 0, 0, [])
-                 print('Ending BF')
+             output = solve(tasks)
              best_output = read_output_file(output_path)
 
              output = ids_to_task_objects(output, abs_path)
