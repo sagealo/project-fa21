@@ -85,11 +85,11 @@ def solve_brute_force(tasks, curr_time, curr_igloo, result):
 def heuristic(task, time):
     return task.get_duration()
 
-def heuristic_sage1(task, time):
+def favor_profit_over_time(task, time):
     # This function gives more weight to functions with better profit over time and real_value / time
     return (task.get_max_benefit() / task.get_duration()) * (get_real_value(time, task) / task.get_duration())
 
-def heuristic_sage2(task, time):
+def favor_early_deadline(task, time):
     # This function gives more weight to tasks which have an earlier deadline
     return (1440 - task.get_deadline()) * get_real_value(time, task) + 1
 
