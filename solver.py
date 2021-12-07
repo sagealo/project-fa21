@@ -58,16 +58,6 @@ def solve(tasks):
 
     return result
 
-
-def heapify_tasks(tasks):
-    """Returns list of tuples (start_time, task) sorted by latest possible start time"""
-    start_times = []
-    for task in tasks:
-        start_time = max(0, task.get_deadline() - task.get_duration)
-        pair = (start_time, task)
-        heap.heappush(start_times, pair)
-    return start_times
-
 def output_profit(tasks):
     profit = 0
     time = 0
