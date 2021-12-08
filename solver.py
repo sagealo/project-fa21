@@ -35,28 +35,28 @@ def solve(tasks):
     """sorted_tasks = sorted(tasks, key=lambda task: task.get_deadline())
     task = sorted_tasks[0]"""
 
-    """curr_time = 0
-    result = []
+    # curr_time = 0
+    # result = []
 
-    while curr_time < 1440:
-        best = None
-        max = float('-inf')
+    # while curr_time < 1440:
+    #     best = None
+    #     max = float('-inf')
 
-        for task in tasks:
-            if curr_time + task.get_duration() <= 1440:
-                val = heuristic(task, curr_time)
-                if val > max:
-                    max = val
-                    best = task
+    #     for task in tasks:
+    #         if curr_time + task.get_duration() <= 1440:
+    #             val = heuristic(task, curr_time)
+    #             if val > max:
+    #                 max = val
+    #                 best = task
 
-        if best == None:
-            return result
+    #     if best == None:
+    #         return result
 
-        curr_time += best.get_duration()
-        result.append(best.get_task_id())
-        tasks.remove(best)
+    #     curr_time += best.get_duration()
+    #     result.append(best.get_task_id())
+    #     tasks.remove(best)
 
-    return result"""
+    # return result
     return solve_dp3(tasks)
 
 def solve_dp(tasks):
@@ -299,7 +299,7 @@ def pseudorandom_combination_heuristic(task, time):
     return (r1 * favor_early_deadline(task, time)) + (r2 * favor_profit_over_time(task, time)) + (r3 * favor_little_free_time(task, time))
 
 def heuristic(task, time):
-    return simple_rate(task, time) * favor_early_deadline(task, time)
+    return favor_little_free_time(task, time)
 
 def favor_profit_over_time(task, time):
     # This function gives more weight to functions with better profit over time and real_value / time
@@ -317,7 +317,7 @@ def favor_little_free_time(task, time):
     time_after_task = time + task.get_duration()                                    # The time after the task is completed
     free_time = deadline - time_after_task                                          # The amount of time between the end of the task and the deadline
     profit = favor_profit_over_time(task, time) * favor_early_deadline(task, time)  # The profit/hueristic function (NOTE: Experiment with this value)
-    constant = 1.38                                                                 # The exponential decay value i.e. the later the bigger the free time the worse it is. (NOTE: Experiment with this value)
+    constant = 1.789                                                              # The exponential decay value i.e. the later the bigger the free time the worse it is. (NOTE: Experiment with this value)
     if free_time >= 0:
         # math.exp(-0.0170 * minutes_late)
         return (1440 - (free_time ** constant)) * profit
@@ -337,6 +337,8 @@ def overwrite_if_better(output, best_output):
     max_profit = output_profit(best_output)
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
+        print('\n')
+        print("New Profit: ", new_profit, " Old Profit: ", max_profit)
         print("BETTER: ","Percent increase in profit: ", ((new_profit - max_profit) / max_profit) * 100, '%', output_path)
 
 def ids_to_task_objects(ids, input_path):
