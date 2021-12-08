@@ -141,7 +141,7 @@ def solve_dp3(tasks):
     for t in range(1, final_ddl + 1):  # reccurence
         for i in range(1, n):
             task = tasks[i]
-            if task.get_task_id() > t:
+            if task.get_duration() > t:
                 dp_profit[i][t] = dp_profit[i - 1][t]
                 dp_sequence[i][t] = list(dp_sequence[i - 1][t])
             else:
@@ -155,7 +155,6 @@ def solve_dp3(tasks):
                     dp_profit[i][t] = do_task_profit
                     dp_sequence[i][t] = list(dp_sequence[i - 1][t - task.get_duration()]) + [task.get_task_id()]  # fix t
     print("ANS:", dp_profit[n - 1][final_ddl])
-
     return dp_sequence[n - 1][final_ddl]
 
 
@@ -338,7 +337,6 @@ def overwrite_if_better(output, best_output):
 
     print("new_profit: " + str(new_profit))
     print("max_profit: " + str(max_profit))
-    write_output_file(output_path, [task.get_task_id() for task in output])
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
         print("BETTER: ","Percent increase in profit: ", ((new_profit - max_profit) / max_profit) * 100, '%', output_path)
@@ -354,27 +352,15 @@ def ids_to_task_objects(ids, input_path):
 # Here's an example of how to run your solver.
 if __name__ == '__main__':
     for dir in os.listdir('inputs/'):
-        if dir == "small":
-            for input_path in os.listdir('inputs/' + dir):
-                abs_path = 'inputs/' + dir + '/' + input_path
-                output_path = 'outputs/' + dir + '/' + input_path[:-3] + '.out'
-                print(abs_path)
-                tasks = read_input_file(abs_path)
-                output = solve(tasks)
-                output_tasks = ids_to_task_objects(output, abs_path)
-                time = 0
-                for task in output_tasks:
-                    time += task.get_duration()
-                if time > 1440:
-                    print("Time limit exceeded", time)
-                    # raise ValueError('ERROR: Time limit exceeded')
-                print("Profit:", output_profit(output_tasks))
-                write_output_file(output_path, output)
-
-                # best_output = read_output_file(output_path)
-                # output = ids_to_task_objects(output, abs_path)
-                # best_output = ids_to_task_objects(best_output, abs_path)
-                #
-                # overwrite_if_better(output, best_output)
+        for input_path in os.listdir('inputs/' + dir):
+            abs_path = 'inputs/' + dir + '/' + input_path
+            output_path = 'outputs/' + dir + '/' + input_path[:-3] + '.out'
+            print(abs_path)
+            tasks = read_input_file(abs_path)
+            output = solve(tasks)
+            best_output = read_output_file(output_path)
+            output = ids_to_task_objects(output, abs_path)
+            best_output = ids_to_task_objects(best_output, abs_path)
+            overwrite_if_better(output, best_output)
 
 
