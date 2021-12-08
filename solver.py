@@ -319,6 +319,7 @@ def favor_little_free_time(task, time):
     profit = favor_profit_over_time(task, time) * favor_early_deadline(task, time)  # The profit/hueristic function (NOTE: Experiment with this value)
     constant = 1.38                                                                 # The exponential decay value i.e. the later the bigger the free time the worse it is. (NOTE: Experiment with this value)
     if free_time >= 0:
+        # math.exp(-0.0170 * minutes_late)
         return (1440 - (free_time ** constant)) * profit
     else:
         return profit
@@ -334,9 +335,6 @@ def overwrite_if_better(output, best_output):
 
     new_profit = output_profit(output)
     max_profit = output_profit(best_output)
-
-    print("new_profit: " + str(new_profit))
-    print("max_profit: " + str(max_profit))
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
         print("BETTER: ","Percent increase in profit: ", ((new_profit - max_profit) / max_profit) * 100, '%', output_path)
