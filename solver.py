@@ -35,7 +35,7 @@ def solve(tasks):
     """sorted_tasks = sorted(tasks, key=lambda task: task.get_deadline())
     task = sorted_tasks[0]"""
 
-    curr_time = 0
+    """curr_time = 0
     result = []
 
     while curr_time < 1440:
@@ -56,7 +56,110 @@ def solve(tasks):
         result.append(best.get_task_id())
         tasks.remove(best)
 
-    return result
+    return result"""
+    return solve_dp3(tasks)
+
+def solve_dp(tasks):
+    tasks.sort(key = lambda task: task.get_deadline())
+    n = len(tasks)
+    final_ddl = 1440
+    dp_profit = [[0 for j in range(final_ddl + 1)] for i in range(n)]
+    dp_sequence = [[[] for j in range(final_ddl + 1)] for i in range(n)]
+    for j in range(1, final_ddl + 1):
+        time_late = j - tasks[0].get_deadline()
+        if j - tasks[0].get_duration() >= 0:
+            dp_profit[0][j] = tasks[0].get_late_benefit(time_late)
+            dp_sequence[0][j] = [0]
+    for i in range(1, n):
+        for j in range(1, final_ddl + 1):
+            task = tasks[i]
+            time_late = j - task.get_deadline()
+            skip_ith_task = dp_profit[i - 1][j]
+            do_ith_task = 0
+            if j - task.get_duration() >= 0:
+                do_ith_task = dp_profit[i - 1][j - task.get_duration()] + task.get_late_benefit(time_late)
+            # dp_profit[i][j] = max(skip_ith_task, do_ith_task)
+            if skip_ith_task >= do_ith_task:
+                dp_profit[i][j] = skip_ith_task
+                dp_sequence[i][j] = dp_sequence[i - 1][j]
+            else:
+                dp_profit[i][j] = do_ith_task
+                dp_sequence[i][j] = dp_sequence[i - 1][j - task.get_duration()] + [i]
+
+    return dp_sequence[n - 1][final_ddl]
+
+def solve_dp2(tasks):
+    tasks.sort(key=lambda task: task.get_deadline())
+    n = len(tasks)
+    final_ddl = 1440
+    dp_profit = [[0 for j in range(final_ddl + 1)] for i in range(n)]
+    dp_sequence = [[[] for j in range(final_ddl + 1)] for i in range(n)]
+    for t in range(1, final_ddl + 1): # base case for all j s.t. i = 0
+        first_task = tasks[0]
+        latest_t = t - first_task.get_duration()
+        if latest_t < 0:
+            dp_profit[0][t] = 0
+            dp_sequence[0][t] = []
+        else:
+            time_late = t - first_task.get_deadline()
+            dp_profit[0][t] = first_task.get_late_benefit(time_late)
+            dp_sequence[0][t] = [0]
+    for t in range(1, final_ddl + 1): # reccurence
+        for i in range(1, n):
+            task = tasks[i]
+            latest_t = t - task.get_duration()
+            if latest_t < 0:
+                dp_profit[i][t] = dp_profit[i - 1][t]
+                dp_sequence[i][t] = list(dp_sequence[i - 1][t])
+            else:
+                time_late = t - task.get_deadline()
+                skip_task_profit = dp_profit[i - 1][t]
+                do_task_profit = dp_profit[i - 1][latest_t] + task.get_late_benefit(time_late)
+                if skip_task_profit >= do_task_profit:
+                    dp_profit[i][t] = skip_task_profit
+                    dp_sequence[i][t] = list(dp_sequence[i - 1][t])
+                else:
+                    dp_profit[i][t] = do_task_profit
+                    dp_sequence[i][t] = list(dp_sequence[i - 1][latest_t]) + [i]
+    return dp_sequence[n - 1][final_ddl]
+
+def solve_dp3(tasks):
+    tasks.sort(key=lambda task: task.get_deadline())
+    n = len(tasks)
+    final_ddl = 1440
+    dp_profit = [[0 for j in range(final_ddl + 1)] for i in range(n)]
+    dp_sequence = [[[] for j in range(final_ddl + 1)] for i in range(n)]
+    for t in range(1, final_ddl + 1):  # base case for all j s.t. i = 0
+        first_task = tasks[0]
+        if first_task.get_duration() > t:
+            dp_profit[0][t] = 0
+            dp_sequence[0][t] = []
+        else:
+            time_late = t - first_task.get_deadline()
+            dp_profit[0][t] = first_task.get_late_benefit(time_late)
+            dp_sequence[0][t] = [first_task.get_task_id()]
+    for t in range(1, final_ddl + 1):  # reccurence
+        for i in range(1, n):
+            task = tasks[i]
+            if task.get_task_id() > t:
+                dp_profit[i][t] = dp_profit[i - 1][t]
+                dp_sequence[i][t] = list(dp_sequence[i - 1][t])
+            else:
+                time_late = t - task.get_deadline()
+                skip_task_profit = dp_profit[i - 1][t]
+                do_task_profit = dp_profit[i - 1][t - task.get_duration()] + task.get_late_benefit(time_late) # fix t
+                if skip_task_profit >= do_task_profit:
+                    dp_profit[i][t] = skip_task_profit
+                    dp_sequence[i][t] = list(dp_sequence[i - 1][t])
+                else:
+                    dp_profit[i][t] = do_task_profit
+                    dp_sequence[i][t] = list(dp_sequence[i - 1][t - task.get_duration()]) + [task.get_task_id()]  # fix t
+    print("ANS:", dp_profit[n - 1][final_ddl])
+
+    return dp_sequence[n - 1][final_ddl]
+
+
+
 
 def solve_out_of_order(tasks):
     schedule = [False for _ in range(1440)]
@@ -235,6 +338,7 @@ def overwrite_if_better(output, best_output):
 
     print("new_profit: " + str(new_profit))
     print("max_profit: " + str(max_profit))
+    write_output_file(output_path, [task.get_task_id() for task in output])
     if new_profit > max_profit:
         write_output_file(output_path, [task.get_task_id() for task in output])
         print("BETTER: ","Percent increase in profit: ", ((new_profit - max_profit) / max_profit) * 100, '%', output_path)
@@ -249,16 +353,28 @@ def ids_to_task_objects(ids, input_path):
 
 # Here's an example of how to run your solver.
 if __name__ == '__main__':
-    for i in range(15):
-        for dir in os.listdir('inputs/'):
+    for dir in os.listdir('inputs/'):
+        if dir == "small":
             for input_path in os.listdir('inputs/' + dir):
                 abs_path = 'inputs/' + dir + '/' + input_path
                 output_path = 'outputs/' + dir + '/' + input_path[:-3] + '.out'
-                # print(abs_path)
+                print(abs_path)
                 tasks = read_input_file(abs_path)
                 output = solve(tasks)
-                best_output = read_output_file(output_path)
-                output = ids_to_task_objects(output, abs_path)
-                best_output = ids_to_task_objects(best_output, abs_path)
+                output_tasks = ids_to_task_objects(output, abs_path)
+                time = 0
+                for task in output_tasks:
+                    time += task.get_duration()
+                if time > 1440:
+                    print("Time limit exceeded", time)
+                    # raise ValueError('ERROR: Time limit exceeded')
+                print("Profit:", output_profit(output_tasks))
+                write_output_file(output_path, output)
 
-                overwrite_if_better(output, best_output)
+                # best_output = read_output_file(output_path)
+                # output = ids_to_task_objects(output, abs_path)
+                # best_output = ids_to_task_objects(best_output, abs_path)
+                #
+                # overwrite_if_better(output, best_output)
+
+
